@@ -1,3 +1,7 @@
+# Disclaimer
+
+This is hacky, poorly tested, and probably quite fragile. I hope it works, but I make no guarantees.
+
 # Purpose
 
 This is a gdb extension to automate the process of tracing backwards in rr from a jit instruction to the code that generated that instruction.
@@ -19,7 +23,7 @@ This plugin uses the same approach. The most finicky part is recognizing a memcp
 
 To make it work, jitsrc.py contains an array of pattern tuples of the form "(base_name, hops, func_name, source_var, dest_var)". For example:
 
-   ("__memmove_avx_unaligned_erms", 1, "js::jit::X86Encoding::BaseAssembler::executableCopy", "src", "dst"),
+   ("__memmove_avx_unaligned_erms", 1, "js::jit::X86Encoding::BaseAssembler::executableCopy", "src", "dst")
 
 Each tuple indicates:
 - base_name: the name of the function that implements the actual write
@@ -30,6 +34,6 @@ Each tuple indicates:
 
 To skip past other forms of memcpy, add new entries to the pattern array. Pull requests welcome.
 
-Limitations:
+# Limitations
 
 To the extent that I've tested this at all, it was only on --enable-debug --disable-optimize builds. I expect it would be harder to automate this process for optimized builds.
