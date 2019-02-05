@@ -1,7 +1,9 @@
 import gdb
+import re
 
 patterns = [("__memmove_avx_unaligned_erms", 1, "js::jit::X86Encoding::BaseAssembler::executableCopy", "src", "dst"),
-            ("__memmove_avx_unaligned_erms", 1, "arena_t::RallocSmallOrLarge", "aPtr", "ret")]
+            ("__memmove_avx_unaligned_erms", 1, "arena_t::RallocSmallOrLarge", "aPtr", "ret"),
+            ("mozilla::detail::VectorImpl<.*>::new_<.*>", 3, "mozilla::Vector<.*>::convertToHeapStorage", "beginNoCheck()", "newBuf")]
 
 class JitSource(gdb.Command):
     def __init__(self):
@@ -13,15 +15,16 @@ class JitSource(gdb.Command):
             b.enabled = False
 
     def search_stack(self, base_name, hops, name, src, dst, address):
-        if gdb.newest_frame().name() != base_name:
+        if not re.match(base_name, gdb.newest_frame().name()):
             return None
         f = gdb.newest_frame();
         for _ in range(hops):
             f = f.older()
-        if f.name() != name:
+        if not re.match(name, f.name()):
             return None
-        src_val = f.read_var(src)
-        dst_val = f.read_var(dst)
+        f.select()
+        src_val = gdb.parse_and_eval(src)
+        dst_val = gdb.parse_and_eval(dst)
         return hex(src_val + int(address, 16) - dst_val)
 
     def next_address(self, old):

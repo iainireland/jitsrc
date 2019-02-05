@@ -10,6 +10,11 @@ This is a gdb extension to automate the process of tracing backwards in rr from 
 
 Add "source /path/to/jitsrc.py" to your .gdbinit file.
 
+# Usage
+  (rr) x/10i $pc
+  => 0x240e954ac13a:	pushq  (%rbx)
+  (rr) jitsrc 0x240e954ac13a
+
 # Implementation
 
 My workflow for finding	the source of a jit instruction manually is as follows:
@@ -24,13 +29,14 @@ This plugin uses the same approach. The most finicky part is recognizing a memcp
 To make it work, jitsrc.py contains an array of pattern tuples of the form "(base_name, hops, func_name, source_var, dest_var)". For example:
 
    ("__memmove_avx_unaligned_erms", 1, "js::jit::X86Encoding::BaseAssembler::executableCopy", "src", "dst")
+   ("mozilla::detail::VectorImpl<.&ast;>::new_<.&ast;>", 3, "mozilla::Vector<.&ast;>::convertToHeapStorage", "beginNoCheck()", "newBuf")
 
 Each tuple indicates:
-- base_name: the name of the function that implements the actual write
+- base_name: a regex matching the name of the function that implements the actual write
 - hops: the number of stack frames between base_name and func_name
-- func_name: the name of the function that calls memcpy
-- source_var: the variable in func_name that holds the source of the memcpy
-- dest_var: the variable in func_name that holds the destination of the memcpy
+- func_name: a regex matching the name of the function that calls memcpy
+- source_var: an expression that can be evaluated in the frame corresponding to func_name to get the source of the memcpy
+- dest_var: an expression that can be evaluated in the frame corresponding to func_name to get the source of the memcpy
 
 To skip past other forms of memcpy, add new entries to the pattern array. Pull requests welcome.
 
