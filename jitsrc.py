@@ -2,11 +2,12 @@ import gdb
 import re
 
 patterns = [("__memmove_avx_unaligned_erms", 1, "js::jit::X86Encoding::BaseAssembler::executableCopy", "src", "dst"),
+            ("__memcpy_avx_unaligned", 1, "js::jit::X86Encoding::BaseAssembler::executableCopy", "src", "dst"),
             ("__memmove_avx_unaligned_erms", 1, "arena_t::RallocSmallOrLarge", "aPtr", "ret"),
+            ("__memcpy_avx_unaligned", 1, "arena_t::RallocSmallOrLarge", "aPtr", "ret"),
             ("mozilla::detail::VectorImpl<.*>::new_<.*>", 3, "mozilla::Vector<.*>::convertToHeapStorage", "beginNoCheck()", "newBuf"),
             ("__memmove_avx_unaligned_erms", 1, "js::jit::AssemblerBufferWithConstantPools", "&cur->instructions[0]", "dest"),
-            ("__memcpy_sse2_unaligned", 1, "js::jit::AssemblerBufferWithConstantPools", "&cur->instructions[0]", "dest"),
-            ("__memcpy_avx_unaligned", 1, "js::jit::X86Encoding::BaseAssembler::executableCopy", "src", "dst")]
+            ("__memcpy_sse2_unaligned", 1, "js::jit::AssemblerBufferWithConstantPools", "&cur->instructions[0]", "dest")]
 
 class JitSource(gdb.Command):
     def __init__(self):
