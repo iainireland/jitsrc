@@ -7,7 +7,9 @@ patterns = [("__memmove_avx_unaligned_erms", 1, "js::jit::X86Encoding::BaseAssem
             ("__memcpy_avx_unaligned", 1, "arena_t::RallocSmallOrLarge", "aPtr", "ret"),
             ("mozilla::detail::VectorImpl<.*>::new_<.*>", 3, "mozilla::Vector<.*>::convertToHeapStorage", "beginNoCheck()", "newBuf"),
             ("__memmove_avx_unaligned_erms", 1, "js::jit::AssemblerBufferWithConstantPools", "&cur->instructions[0]", "dest"),
-            ("__memcpy_sse2_unaligned", 1, "js::jit::AssemblerBufferWithConstantPools", "&cur->instructions[0]", "dest")]
+            ("__memcpy_sse2_unaligned", 1, "js::jit::AssemblerBufferWithConstantPools", "&cur->instructions[0]", "dest"),
+            ("__memcpy_sse2_unaligned", 2, "js::jit::AssemblerX86Shared::executableCopy", "masm.m_formatter.m_buffer.m_buffer.mBegin", "buffer"),
+            ("__memcpy_sse2_unaligned", 1, "arena_t::RallocSmallOrLarge", "aPtr", "ret")]
 
 class JitSource(gdb.Command):
     def __init__(self):
