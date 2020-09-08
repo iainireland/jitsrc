@@ -17,13 +17,18 @@ class JitSource(gdb.Command):
         self.dont_repeat()
 
     def disable_breakpoints(self):
-        for b in gdb.breakpoints():
+        self.disabled_breakpoints = [b for b in gdb.breakpoints() if b.enabled]
+        for b in self.disabled_breakpoints:
             b.enabled = False
+
+    def enable_breakpoints(self):
+        for b in self.disabled_breakpoints:
+            b.enabled = True
 
     def search_stack(self, base_name, hops, name, src, dst, address):
         if not re.match(base_name, gdb.newest_frame().name()):
             return None
-        f = gdb.newest_frame();
+        f = gdb.newest_frame()
         for _ in range(hops):
             f = f.older()
         if not re.match(name, f.name()):
@@ -35,35 +40,29 @@ class JitSource(gdb.Command):
 
     def next_address(self, old):
         for pattern in patterns:
-            found = self.search_stack(pattern[0],
-                                      pattern[1],
-                                      pattern[2],
-                                      pattern[3],
-                                      pattern[4],
-                                      old)
+            found = self.search_stack(*pattern, old)
             if found:
                 return found
         return None
 
-
     def runback(self, address):
-        self.disable_breakpoints()
         b = gdb.Breakpoint("*" + address,
                            type=gdb.BP_WATCHPOINT,
                            wp_class=gdb.WP_WRITE,
-                           internal=True)
+                           internal=True, temporary=True)
         while b.hit_count == 0:
             gdb.execute('rc', to_string=True)
         b.delete()
-        next = self.next_address(address)
-        if next:
-            self.runback(next)
-
 
     def invoke(self, arg, from_tty):
         args = gdb.string_to_argv(arg)
         address = args[0]
-        self.runback(address)
+        self.disable_breakpoints()
+        while address:
+            self.runback(address)
+            address = self.next_address(address)
+        self.enable_breakpoints()
+
 
 # Register to the gdb runtime
 JitSource()
