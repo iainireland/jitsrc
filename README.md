@@ -1,3 +1,7 @@
+# OBSOLETE
+
+This code has been [upstreamed into mozilla-central](https://bugzilla.mozilla.org/show_bug.cgi?id=1661763). Further changes will be made in-tree.
+
 # Disclaimer
 
 This is hacky, poorly tested, and probably quite fragile. I hope it works, but I make no guarantees.
